@@ -1,8 +1,8 @@
-# Open Voice PE v5: no wake word. The Smart Listening package starts a request whenever
+# Open Voice PE v4: no wake word. The Smart Listening package starts a request whenever
 # the device hears speech, and the Smart Listening integration in Home Assistant decides
 # which speech was meant for the assistant. See https://github.com/mike-nott/smart-listening
 #
-# Replies play on the room's Sonos through the v4 script (../v4-stock-package/).
+# Replies play on the room's Sonos through the v3 script (../v3-stock-package/).
 
 substitutions:
   name: open-voice-pe-living-room

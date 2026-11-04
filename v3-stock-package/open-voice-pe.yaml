@@ -1,4 +1,4 @@
-# Open Voice PE v4: the stock Voice PE firmware as a package, plus custom wake words and
+# Open Voice PE v3: the stock Voice PE firmware as a package, plus custom wake words and
 # replies on a room speaker. One file per device: change the substitutions and the
 # input_boolean for each room.
 

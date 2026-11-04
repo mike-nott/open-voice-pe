@@ -1,8 +1,8 @@
-# Open Voice PE v4: stock package
+# Open Voice PE v3: stock package
 
 Used until November 2026, and still the version to use if you want to keep wake words.
 
-Earlier versions were full copies of the official firmware, so every stock release had to be merged by hand. v4 is a short device file that includes the official firmware as a package and adds only what is different:
+Earlier versions were full copies of the official firmware, so every stock release had to be merged by hand. v3 is a short device file that includes the official firmware as a package and adds only what is different:
 
 - **Custom wake words** added to the stock models
 - **Replies on the room's Sonos.** When a reply is ready, the Voice PE calls a Home Assistant script with the audio URL. The script takes a snapshot of the Sonos, plays the reply, waits for it to finish and restores what was playing, music included
