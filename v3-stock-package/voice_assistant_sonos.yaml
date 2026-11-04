@@ -1,0 +1,48 @@
+# Home Assistant script: play an Assist reply on the room's Sonos, then put back whatever
+# was playing. Add one line per Voice PE to each map, and one input_boolean per room
+# (Settings > Devices & services > Helpers > Toggle).
+alias: Voice Assistant Sonos
+mode: parallel
+fields:
+  url:
+    description: Audio URL of the Assist reply
+    example: "https://…/tts.mp3"
+  satellite:
+    description: ESPHome name of the Voice PE
+    example: open-voice-pe-living-room
+sequence:
+  - variables:
+      satellite_to_player:
+        open-voice-pe-living-room: media_player.living_room
+        open-voice-pe-kitchen: media_player.kitchen
+      satellite_to_boolean:
+        open-voice-pe-living-room: input_boolean.voice_tts_active_living_room
+        open-voice-pe-kitchen: input_boolean.voice_tts_active_kitchen
+      target: "{{ satellite_to_player[satellite] }}"
+      tts_boolean: "{{ satellite_to_boolean[satellite] }}"
+  - action: input_boolean.turn_on
+    target:
+      entity_id: "{{ tts_boolean }}"
+  - action: sonos.snapshot
+    data:
+      entity_id: "{{ target }}"
+      with_group: true
+  - action: media_player.play_media
+    data:
+      entity_id: "{{ target }}"
+      media:
+        media_content_id: "{{ url }}"
+        media_content_type: music
+        metadata: {}
+  - delay:
+      seconds: 1
+  - wait_template: "{{ not is_state(target, 'playing') }}"
+    timeout: "00:02:00"
+    continue_on_timeout: true
+  - action: sonos.restore
+    data:
+      entity_id: "{{ target }}"
+      with_group: true
+  - action: input_boolean.turn_off
+    target:
+      entity_id: "{{ tts_boolean }}"
