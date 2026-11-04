@@ -1,0 +1,40 @@
+# Open Voice PE v5: no wake word. The Smart Listening package starts a request whenever
+# the device hears speech, and the Smart Listening integration in Home Assistant decides
+# which speech was meant for the assistant. See https://github.com/mike-nott/smart-listening
+#
+# Replies play on the room's Sonos through the v4 script (../v4-stock-package/).
+
+substitutions:
+  name: open-voice-pe-living-room
+  friendly_name: Open Voice PE (Living Room)
+
+packages:
+  voice_pe: github://esphome/home-assistant-voice-pe/home-assistant-voice.yaml@26.9.0
+  # After the stock package: it replaces some of the stock handlers.
+  smart_listening: github://mike-nott/smart-listening/esphome/smart-listening.yaml@main
+
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+media_player:
+  - id: !extend external_media_player
+    announcement_pipeline:
+      format: MP3
+
+voice_assistant:
+  on_tts_end:
+    - homeassistant.action:
+        action: script.voice_assistant_sonos
+        data:
+          url: !lambda 'return x;'
+          satellite: "${name}"

@@ -1,0 +1,63 @@
+# Open Voice PE v4: the stock Voice PE firmware as a package, plus custom wake words and
+# replies on a room speaker. One file per device: change the substitutions and the
+# input_boolean for each room.
+
+substitutions:
+  name: open-voice-pe-living-room
+  friendly_name: Open Voice PE (Living Room)
+
+packages:
+  voice_pe: github://esphome/home-assistant-voice-pe/home-assistant-voice.yaml@26.9.0
+
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Custom microWakeWord models (JSON and .tflite in /config/esphome/), added to the stock
+# ones, one per assistant.
+micro_wake_word:
+  id: mww
+  models:
+    - model: /config/esphome/wake_word_1.json
+      id: wake_word_1
+    - model: /config/esphome/wake_word_2.json
+      id: wake_word_2
+
+# On while the room speaker is playing a reply (set by script.voice_assistant_sonos).
+binary_sensor:
+  - platform: homeassistant
+    id: tts_active
+    entity_id: input_boolean.voice_tts_active_living_room
+
+voice_assistant:
+  # Silence the Voice PE's own speaker: the reply plays on the room speaker instead.
+  on_tts_start:
+    - media_player.volume_set:
+        id: external_media_player
+        volume: 0.0
+
+  on_tts_end:
+    - homeassistant.action:
+        action: script.voice_assistant_sonos
+        data:
+          url: !lambda 'return x;'
+          satellite: "${name}"
+
+  # Restore the Voice PE's volume once the room speaker has finished.
+  on_end:
+    - wait_until:
+        condition:
+          binary_sensor.is_off: tts_active
+        timeout: 120s
+    - media_player.volume_set:
+        id: external_media_player
+        volume: 0.6

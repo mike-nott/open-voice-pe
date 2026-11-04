@@ -1,110 +1,47 @@
 # Open Voice PE
 
-**Open Voice PE** is a custom firmware for the [Home Assistant Voice Preview Edition](https://github.com/esphome/home-assistant-voice-pe) project, built with ESPHome on an ESP32-S3. It extends the official Voice PE firmware with additional features for enhanced voice assistant functionality in Home Assistant.
+Custom firmware and setups for the [Home Assistant Voice Preview Edition](https://github.com/esphome/home-assistant-voice-pe), as they have evolved in one home with nine Voice PEs. Each version is kept in its own folder, so you can see how it got here and reuse whichever piece fits your setup.
 
-This firmware is designed for users who want to customize their Voice PE device with advanced wake word detection and flexible TTS playback options.
+**Current version: [v5, Smart Listening](v5-smart-listening/).** No wake word: you talk to the assistant naturally, and Home Assistant decides which speech was meant for it.
 
-## Features
-This custom firmware adds the following features to the official Home Assistant Voice PE:
+## Versions
 
-- **Support for openWakeWord**: Enables local wake word detection using the `openWakeWord` engine, providing an alternative to the default wake word system for improved flexibility and privacy.
-- **TTS Playback on Different Media Players**: Allows you to play voice assistant responses on a remote media player (e.g., a Home Assistant media player entity) instead of the local speaker, configurable via a dropdown in Home Assistant.
+| Version | When | Wake word | Replies play on | What changed |
+| --- | --- | --- | --- | --- |
+| [v1, openWakeWord](v1-openwakeword/) | March 2025 | openWakeWord, in Home Assistant | A media player chosen per device | First custom firmware: wake word detection moved off the device, replies on a room speaker |
+| [v2, microWakeWord](v2-microwakeword/) | April 2025 | A custom microWakeWord model, on the device | The room's speaker, with the Voice PE's own speaker silenced | Back to on-device wake words, with a model trained for the assistant's name; every sound (wake chime, timers, replies) on the room speaker |
+| [v3, several wake words](v3-multi-wake-word/) | July 2025 | Several custom models, one per assistant | The room's speaker, set with one substitution | One file for every room; each person's assistant has its own wake word |
+| [v4, stock package](v4-stock-package/) | Until November 2026 | Custom models added to the stock ones | The room's Sonos, through a Home Assistant script that resumes what was playing | A short device file on top of the official firmware package instead of a full copy, so stock updates arrive without merging |
+| [v5, Smart Listening](v5-smart-listening/) | November 2026 | None (wake word models only give a hint) | The room's Sonos, as in v4 | The device listens for speech and Home Assistant judges each transcript: no ghost wakes, no chime, natural follow-ups |
 
-## Prerequisites
-- **Official Home Assistant Voice PE**: This firmware is designed for the [Home Assistant Voice PE](https://github.com/esphome/home-assistant-voice-pe) device. Refer to the [official documentation](https://voice-pe.home-assistant.io) for hardware requirements, assembly instructions, and initial setup.
-- **Home Assistant**: A running instance of Home Assistant (version 2025.3.0 or later recommended) with the ESPHome integration installed.
-- **ESPHome**: ESPHome (version 2025.3.0 or later) for compiling and uploading the firmware.
-- **Wyoming Satellite**: A configured Wyoming satellite in Home Assistant for voice assistant functionality (STT/TTS pipeline).
+v1 to v3 are full copies of the firmware from 2025, and may not build with current ESPHome versions. v4 and v5 use the official firmware as a package, pinned to stock release 26.9.0.
 
-## Setup Instructions
+## Which one to use
 
-### 1. Install ESPHome
-- Follow the [ESPHome installation guide](https://esphome.io/guides/installing_esphome.html) to set up ESPHome on your system.
-- If using the ESPHome Dashboard in Home Assistant, ensure it’s installed via HACS or manually.
+- **To stop ghost wakes, or to talk without a wake word**: [v5](v5-smart-listening/), with the [Smart Listening](https://github.com/mike-nott/smart-listening) integration
+- **To keep wake words, with replies on a Sonos**: [v4](v4-stock-package/)
+- **For reference**: v1 to v3 show earlier approaches. They are not maintained
 
-### 2. Configure Secrets
-- Create a `secrets.yaml` file in your ESPHome config directory with the following:
-  ```yaml
-  # Your Wi-Fi SSID and password
-  wifi_ssid: "your-wifi-ssid"
-  wifi_password: "your-wifi-password"
+## Common setup
 
-  # API encryption key for open-voice-pe
-  api_encryption_key_open_voice_pe: "your-api-encryption-key"
-  ```
-- Generate a unique API encryption key using the ESPHome Dashboard or by running `esphome wizard`.
+All versions are ESPHome configurations for a Voice PE that has been adopted in the ESPHome Device Builder add-on. Each device needs a `secrets.yaml` in the ESPHome config folder with:
 
-### 3. Copy Configuration
-- Copy `open-voice-pe.yaml` to your ESPHome config directory.
-- **Important**: The `name` in the `SUBSTITUTIONS` section (`open-voice-pe`) must match the file name (`open-voice-pe.yaml`). If you copy the contents of this file into a differently named file (e.g., `home-assistant-voice-09065b.yaml`), you must update the `name` to match the file name (e.g., `name: home-assistant-voice-09065b`), or rename the file to `open-voice-pe.yaml`. Using a mismatched `name` and file name can cause conflicts in ESPHome and Home Assistant.
-- If you have multiple Open Voice PE devices, update the `name` to a unique value (e.g., `open-voice-pe-living-room`) and rename the file accordingly (e.g., `open-voice-pe-living-room.yaml`).
+```yaml
+wifi_ssid: "your-wifi-ssid"
+wifi_password: "your-wifi-password"
+api_encryption_key: "your-api-encryption-key"
+```
 
-### 4. Configure Media Player for TTS Playback
-- The `SELECT` section in `open-voice-pe.yaml` contains a list of media players for TTS playback. Edit the `options` list under `tts_target_media_player_select` to match the media players in your Home Assistant setup:
-  ```yaml
-  select:
-    - platform: template
-      name: "TTS target media player"
-      id: tts_target_media_player_select
-      options:
-        - "media_player.living_room"
-        - "media_player.kitchen"
-        - "media_player.bedroom"
-      # ... other properties
-  ```
-- Replace `media_player.living_room`, `media_player.kitchen`, etc., with your own media player entity IDs (e.g., `media_player.my_speaker`).
+Custom wake word models (v2 to v4) are microWakeWord models you train yourself: put each model's JSON file and its `.tflite` file in `/config/esphome/`.
 
-### 5. Compile and Upload
-- Compile the firmware:
-  ```
-  esphome compile open-voice-pe.yaml
-  ```
-- Upload the firmware to your ESP32-S3:
-  ```
-  esphome upload open-voice-pe.yaml
-  ```
-- Note: If you renamed the file (e.g., to `open-voice-pe-living-room.yaml`), use that file name in the commands.
+For replies on another speaker (all versions), allow the device to perform Home Assistant actions: **Settings → Devices & services → ESPHome → your Voice PE → Configure → Allow the device to perform Home Assistant actions**.
 
-### 6. Integrate with Home Assistant
-- Add the device to Home Assistant via the ESPHome integration:
-  - Go to **Settings > Devices & Services > Integrations** in Home Assistant.
-  - Click **Add Integration**, select **ESPHome**, and enter the device’s mDNS address (e.g., `open-voice-pe.local`).
-- Configure the Wyoming satellite in Home Assistant to enable voice assistant functionality:
-  - Follow the [Wyoming Satellite Setup Guide](https://github.com/rhasspy/wyoming-satellite) to set up STT and TTS pipelines.
-  - Configure your preferred wake word in the Wyoming satellite settings (this firmware supports `openWakeWord` for local wake word detection).
-- **Additional Configuration**: To enable TTS playback on remote media players:
-  1. In Home Assistant, go to **Settings > Devices & Services > Integrations**.
-  2. Find your ESPHome integration and click on the Open Voice PE device (e.g., `open-voice-pe`).
-  3. In the device settings, locate the option labeled **"Allow the device to perform Home Assistant actions"**.
-  4. Check this box and save the changes.
-     - **Note**: If this option is not enabled, the `media_player.play_media` service call will fail, and TTS responses will not play on remote media players.
+## Related projects
 
-### 7. Test the Custom Features
-- **Wake Word Detection with openWakeWord**:
-  - Ensure your wake word is configured in the Wyoming satellite.
-  - Test wake word detection by saying your wake word. Check the ESPHome logs (`esphome logs open-voice-pe.yaml`) for `openWakeWord` activity.
-- **TTS Playback on Remote Media Player**:
-  - Select a remote media player from the `TTS target media player` dropdown in Home Assistant.
-  - Issue a voice command and verify that the response plays on the selected media player.
-
-## Troubleshooting
-- **Wake Word Not Detected**:
-  - Check the ESPHome logs for errors related to `openWakeWord`.
-  - Ensure the Wyoming satellite is configured with a wake word supported by `openWakeWord`.
-  - Adjust the `noise_suppression_level` or `auto_gain` in the `VOICE_ASSISTANT` section if background noise is an issue.
-- **TTS Not Playing on Remote Media Player**:
-  - Verify that the selected media player in the `TTS target media player` dropdown exists in Home Assistant.
-  - Check the logs for errors related to `homeassistant.service` calls in the `on_tts_end` handler.
-  - Ensure the remote media player is online and supports the `media_player.play_media` service.
-- **Device Not Connecting to Home Assistant**:
-  - Ensure the API encryption key in `secrets.yaml` matches the one used in Home Assistant.
-  - Verify Wi-Fi credentials in `secrets.yaml` are correct.
-  - Check the mDNS address (`open-voice-pe.local`) resolves correctly on your network.
-
-## Roadmap
-The following features are planned for future releases:
-- **Follow-Up Responses**: Enable the device to listen for additional commands after a response without requiring the wake word again.
-- **Wake Word Arbitration**: Improve wake word detection reliability by arbitrating between multiple wake word engines or instances.
+- [Smart Listening](https://github.com/mike-nott/smart-listening): the Home Assistant integration behind v5
+- [MCP Assist](https://github.com/mike-nott/mcp-assist): a conversation agent for Home Assistant
+- [Smart Announcements](https://github.com/mike-nott/smart-announcements): announcements routed to the room each person is in
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
