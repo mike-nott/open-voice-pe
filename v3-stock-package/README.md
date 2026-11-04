@@ -1,6 +1,6 @@
 # Open Voice PE v3: stock package
 
-Used until November 2026, and still the version to use if you want to keep wake words.
+Used from December 2025 to November 2026, and still the version to use if you want to keep wake words.
 
 Earlier versions were full copies of the official firmware, so every stock release had to be merged by hand. v3 is a short device file that includes the official firmware as a package and adds only what is different:
 

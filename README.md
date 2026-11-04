@@ -10,10 +10,10 @@ Custom firmware and setups for the [Home Assistant Voice Preview Edition](https:
 | --- | --- | --- | --- | --- |
 | [v1, openWakeWord](v1-openwakeword/) | March 2025 | openWakeWord, in Home Assistant | A media player chosen per device | First custom firmware: wake word detection moved off the device, replies on a room speaker |
 | [v2, microWakeWord](v2-microwakeword/) | April 2025 | A custom microWakeWord model, on the device | The room's speaker, with the Voice PE's own speaker silenced | Back to on-device wake words, with a model trained for the assistant's name; every sound (wake chime, timers, replies) on the room speaker |
-| [v3, stock package](v3-stock-package/) | Until November 2026 | Several custom models, one per assistant, added to the stock ones | The room's Sonos, through a Home Assistant script that resumes what was playing | A short device file on top of the official firmware package instead of a full copy, so stock updates arrive without merging |
+| [v3, stock package](v3-stock-package/) | December 2025 to November 2026 | Several custom models, one per assistant, added to the stock ones | The room's Sonos, through a Home Assistant script that resumes what was playing | A short device file on top of the official firmware package instead of a full copy, so stock updates arrive without merging |
 | [v4, Smart Listening](v4-smart-listening/) | November 2026 | None (wake word models only give a hint) | The room's Sonos, as in v3 | The device listens for speech and Home Assistant judges each transcript: no ghost wakes, no chime, natural follow-ups |
 
-v1 and v2 are full copies of the firmware from 2025, and may not build with current ESPHome versions. v3 and v4 use the official firmware as a package, pinned to stock release 26.9.0.
+v1 and v2 are full copies of the firmware from early 2025, and may not build with current ESPHome versions. v3 and v4 use the official firmware as a package, pinned to stock release 26.9.0.
 
 ## Which one to use
 
